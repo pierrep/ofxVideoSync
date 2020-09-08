@@ -30,6 +30,8 @@ void ofxVideoSyncReceiver::updateSync()
             position_slave = slaveVideo->getPosition() * vidDuration;
             deviation = position_master - position_slave;
 
+            ofLogVerbose() << "Deviation: " << deviation;
+
             deviations.push_back(deviation);
 
             if (deviations.size() > 10) {
@@ -60,8 +62,7 @@ void ofxVideoSyncReceiver::update()
 
     if(wait_for_sync && (sync_timer > 0.0f)) {
             float counter = fabs(deviation) - (ofGetElapsedTimef() - sync_timer);
-            ofLogNotice() << "wait_for_sync counter = " << counter << "  deviation = " << fabs(deviation);
-            //if (counter < 0.025f)
+            //ofLogNotice() << "wait_for_sync counter = " << counter << "  deviation = " << fabs(deviation);
             if (counter < 0.0f)
             {
                 ofLogNotice() << "we are synchronised, play...";
@@ -79,23 +80,21 @@ void ofxVideoSyncReceiver::update()
     if (wait_after_sync) {
         if ((ofGetElapsedTimef() - wait_after_sync_timer) > SYNC_GRACE_TIME) {
              wait_after_sync = false;
-             ofLogNotice() << "Wait after sync expired...";
+             ofLogVerbose() << "Wait after sync expired...";
         }
         return;
     }
 
     //ofLogNotice() << "Master position: " << position_master << "  Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
 
-    if ((fabs(median_deviation) > SYNC_TOLERANCE) && (position_slave > SYNC_GRACE_TIME) && (position_master > SYNC_GRACE_TIME))
+    if ((fabs(median_deviation) > SYNC_TOLERANCE) && (position_slave > SYNC_GRACE_TIME) && (position_master > SYNC_GRACE_TIME) &&(!wait_for_sync))
     {
         ofLogNotice() << "Time: " << ofGetTimestampString("%H:%M %S secs") << "  Master position: " << position_master << " Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
-        ofLogNotice() << "vidDuration = " << vidDuration;
         if (position_master < vidDuration) {
             slaveVideo->setPosition((position_master + SYNC_JUMP_AHEAD)/vidDuration);
             ofLogNotice() << "Jump ahead to: " << (position_master + SYNC_JUMP_AHEAD)/vidDuration;
         }
         slaveVideo->update();
-        ofLogNotice() << "Slave new position = " << slaveVideo->getPosition();
         slaveVideo->setPaused(true);
 
         wait_for_sync = true;
