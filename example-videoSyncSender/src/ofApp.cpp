@@ -2,21 +2,20 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    video.load("../../../videos/wifisync.mp4");
-    syncSender.setup(&video);
-    video.play();
+    syncSender.load("../../../videos/wifisync.mp4");
+    syncSender.setup();
+    syncSender.play();
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    video.update();
     syncSender.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    video.draw(0,0,720,360);
+    syncSender.draw(0,0,1280,720);
 }
 
 //--------------------------------------------------------------
@@ -31,10 +30,7 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-    float value = (float) x / ofGetWidth();
-    int frame = video.getTotalNumFrames()*value;
-    //ofLogNotice() << "seek to frame: " << frame;
-    video.setFrame(frame);
+
 }
 
 //--------------------------------------------------------------

@@ -1,11 +1,17 @@
 #include "ofxVideoSyncSender.h"
 
-void ofxVideoSyncSender::setup(ofVideoPlayer* _video, bool _localhost)
+#ifdef TARGET_RASPBERRY_PI
+void ofxVideoSyncSender::setup(ofxOMXPlayerSettings settings)
+{
+
+}
+#endif
+
+void ofxVideoSyncSender::setup(bool _localhost)
 {
     bUseLocalhost = _localhost;
-    video = _video;
-    totalFrames = video->getTotalNumFrames();
-    vidDuration = video->getDuration();
+    totalFrames = video.getTotalNumFrames();
+    vidDuration = video.getDuration();
 
     if (bUseLocalhost) {
         ofLogNotice() << "broadcasting on localhost";
@@ -17,9 +23,31 @@ void ofxVideoSyncSender::setup(ofVideoPlayer* _video, bool _localhost)
     }
 }
 
+void ofxVideoSyncSender::load(const string name)
+{
+    video.load(name);
+}
+
+void ofxVideoSyncSender::play()
+{
+    video.play();
+}
+
+void ofxVideoSyncSender::draw(float x, float y, float w, float h)
+{
+    video.draw(x,y,w,h);
+}
+
+void ofxVideoSyncSender::draw(float x, float y)
+{
+    video.draw(x,y);
+}
+
 void ofxVideoSyncSender::update()
 {
-    float currentPosition = video->getPosition() * vidDuration;
+    video.update();
+
+    float currentPosition = video.getPosition() * vidDuration;
 
     msg.clear();
     msg.setAddress("/sync/position");
