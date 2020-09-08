@@ -9,6 +9,9 @@
 
 class ofxVideoSyncSender {
     public:
+#ifdef TARGET_RASPBERRY_PI
+        ofxOMXPlayer setup(ofxOMXPlayerSettings settings);
+#endif
         void setup(bool _localhost = false);
         void load(const string video);
         void play();

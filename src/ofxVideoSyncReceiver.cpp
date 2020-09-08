@@ -10,13 +10,32 @@ ofxVideoSyncReceiver::~ofxVideoSyncReceiver()
     }
 }
 
-void ofxVideoSyncReceiver::setup(ofVideoPlayer* _video)
+void ofxVideoSyncReceiver::setup()
 {
-    slaveVideo = _video;
-    totalFrames = slaveVideo->getTotalNumFrames();
-    vidDuration = slaveVideo->getDuration();
+    totalFrames = video.getTotalNumFrames();
+    vidDuration = video.getDuration();
     loadSettings();
     oscReceiver.setup(12345);
+}
+
+void ofxVideoSyncReceiver::load(const string name)
+{
+    video.load(name);
+}
+
+void ofxVideoSyncReceiver::play()
+{
+    video.play();
+}
+
+void ofxVideoSyncReceiver::draw(float x, float y, float w, float h)
+{
+    video.draw(x,y,w,h);
+}
+
+void ofxVideoSyncReceiver::draw(float x, float y)
+{
+    video.draw(x,y);
 }
 
 void ofxVideoSyncReceiver::updateSync()
@@ -32,7 +51,7 @@ void ofxVideoSyncReceiver::updateSync()
         // check for mouse moved message
         if (msg.getAddress() == "/sync/position") {
             position_master = msg.getArgAsFloat(0);
-            position_slave = slaveVideo->getPosition() * vidDuration;
+            position_slave = video.getPosition() * vidDuration;
             deviation = position_master - position_slave;
 
             ofLogVerbose() << "Deviation: " << deviation;
@@ -68,7 +87,7 @@ void ofxVideoSyncReceiver::update()
         //ofLogNotice() << "wait_for_sync counter = " << counter << "  deviation = " << fabs(deviation);
         if (counter < 0.0f) {
             ofLogNotice() << "we are synchronised, play...";
-            slaveVideo->setPaused(false);
+            video.setPaused(false);
 
             wait_for_sync = false;
             wait_after_sync = true;
@@ -92,15 +111,17 @@ void ofxVideoSyncReceiver::update()
     if ((fabs(median_deviation) > sync_tolerance) && (position_slave > SYNC_GRACE_TIME) && (position_master > SYNC_GRACE_TIME) && (!wait_for_sync)) {
         ofLogNotice() << "Time: " << ofGetTimestampString("%H:%M %S secs") << "  Master position: " << position_master << " Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
         if (position_master < vidDuration) {
-            slaveVideo->setPosition((position_master + SYNC_JUMP_AHEAD) / vidDuration);
+            video.setPosition((position_master + SYNC_JUMP_AHEAD) / vidDuration);
             ofLogNotice() << "Jump ahead to: " << (position_master + SYNC_JUMP_AHEAD) / vidDuration;
         }
-        slaveVideo->update();
-        slaveVideo->setPaused(true);
+        video.update();
+        video.setPaused(true);
 
         wait_for_sync = true;
         wait_after_sync = ofGetElapsedTimef();
     }
+
+    video.update();
 }
 
 void ofxVideoSyncReceiver::loadSettings()

@@ -4,9 +4,9 @@
 //--------------------------------------------------------------
 void ofApp::setup(){    
 
-    video.load("../../../videos/wifisync.mp4");
-    syncReceiver.setup(&video);
-    video.play();
+    syncReceiver.load("../../../videos/wifisync.mp4");
+    syncReceiver.setup();
+    syncReceiver.play();
 
 
 }
@@ -15,12 +15,12 @@ void ofApp::setup(){
 void ofApp::update(){
 
     syncReceiver.update();
-    video.update();
+
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    video.draw(0,0,720,360);
+    syncReceiver.draw(0,0,720,360);
 }
 
 //--------------------------------------------------------------

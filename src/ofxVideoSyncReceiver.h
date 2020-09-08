@@ -6,7 +6,15 @@
 class ofxVideoSyncReceiver {
     public:
         ~ofxVideoSyncReceiver();
-        void setup(ofVideoPlayer* video);
+        void setup();
+
+#ifdef TARGET_RASPBERRY_PI
+        ofxOMXPlayer setup(ofxOMXPlayerSettings settings);
+#endif
+        void load(const string video);
+        void play();
+        void draw(float x, float y, float w, float h);
+        void draw(float x, float y);
         void updateSync();
         void update();
 
@@ -14,7 +22,7 @@ class ofxVideoSyncReceiver {
         void loadSettings();
 
         ofxOscReceiver oscReceiver;
-        ofVideoPlayer* slaveVideo;
+        ofVideoPlayer video;
         int totalFrames;
         float vidDuration;
         float position_master;
