@@ -5,11 +5,14 @@
 
 class ofxVideoSyncReceiver {
     public:
+        ~ofxVideoSyncReceiver();
         void setup(ofVideoPlayer* video);
         void updateSync();
         void update();
 
     protected:
+        void loadSettings();
+
         ofxOscReceiver oscReceiver;
         ofVideoPlayer* slaveVideo;
         int totalFrames;
@@ -23,4 +26,6 @@ class ofxVideoSyncReceiver {
         deque<float> deviations;
         float sync_timer;
         float median_deviation;
+        float sync_tolerance;
+        ofXml xml;
 };
