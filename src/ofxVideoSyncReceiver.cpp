@@ -12,8 +12,25 @@ ofxVideoSyncReceiver::~ofxVideoSyncReceiver()
 
 void ofxVideoSyncReceiver::setup()
 {
+    bool bLoaded;    
+    #ifdef TARGET_RASPBERRY_PI
+    bLoaded = video.isOpen();
+    #else
+    bLoaded = video.isLoaded();
+    #endif
+    if(!bLoaded) {
+        ofLogError("ofxVideoSyncReceiver") << "Video needs to be loaded before setup().";
+        return;
+    }
+    
     totalFrames = video.getTotalNumFrames();
+    
+    #ifdef TARGET_RASPBERRY_PI
+    vidDuration = video.getDurationInSeconds();
+    #else
     vidDuration = video.getDuration();
+    #endif 
+    
     loadSettings();
     oscReceiver.setup(12345);
 }
@@ -22,7 +39,8 @@ void ofxVideoSyncReceiver::load(const string name)
 {
     #ifdef TARGET_RASPBERRY_PI
     ofxOMXPlayerSettings settings;
-    settings.videoPath = name;
+    string videoPath = ofToDataPath(name, true);
+    settings.videoPath = videoPath;    
     settings.enableTexture = true;
     settings.enableLooping = true;
     settings.enableAudio = false;
@@ -37,7 +55,9 @@ void ofxVideoSyncReceiver::load(const string name)
 
 void ofxVideoSyncReceiver::play()
 {
+    #ifndef TARGET_RASPBERRY_PI
     video.play();
+    #endif
 }
 
 void ofxVideoSyncReceiver::draw(float x, float y, float w, float h)
@@ -47,7 +67,11 @@ void ofxVideoSyncReceiver::draw(float x, float y, float w, float h)
 
 void ofxVideoSyncReceiver::draw(float x, float y)
 {
+    #ifdef TARGET_RASPBERRY_PI
+    video.draw(x,y,video.getWidth(),video.getHeight());
+    #else
     video.draw(x,y);
+    #endif
 }
 
 void ofxVideoSyncReceiver::updateSync()
@@ -62,9 +86,13 @@ void ofxVideoSyncReceiver::updateSync()
 
         // check for mouse moved message
         if (msg.getAddress() == "/sync/position") {
-            position_master = msg.getArgAsFloat(0);
-            position_slave = video.getPosition() * vidDuration;
-            deviation = position_master - position_slave;
+            position_sender = msg.getArgAsFloat(0);
+            #ifdef TARGET_RASPBERRY_PI
+            position_receiver = video.getMediaTime();
+            #else
+            position_receiver = video.getPosition() * vidDuration;
+            #endif
+            deviation = position_sender - position_receiver;
 
             ofLogVerbose() << "Deviation: " << deviation;
 
@@ -96,7 +124,7 @@ void ofxVideoSyncReceiver::update()
 
     if (wait_for_sync && (sync_timer > 0.0f)) {
         float counter = fabs(deviation) - (ofGetElapsedTimef() - sync_timer);
-        //ofLogNotice() << "wait_for_sync counter = " << counter << "  deviation = " << fabs(deviation);
+        ofLogNotice() << "wait_for_sync counter = " << counter << "  deviation = " << fabs(deviation);
         if (counter < 0.0f) {
             ofLogNotice() << "we are synchronised, play...";
             video.setPaused(false);
@@ -118,28 +146,30 @@ void ofxVideoSyncReceiver::update()
         return;
     }
 
-    //ofLogNotice() << "Master position: " << position_master << "  Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
-
-    if ((fabs(median_deviation) > sync_tolerance) && (position_slave > SYNC_GRACE_TIME) && (position_master > SYNC_GRACE_TIME) && (!wait_for_sync)) {
-        ofLogNotice() << "Time: " << ofGetTimestampString("%H:%M %S secs") << "  Master position: " << position_master << " Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
-        if (position_master < vidDuration) {
-#ifdef TARGET_RASPBERRY_PI
-            video.seekToTimeInSeconds((position_master + SYNC_JUMP_AHEAD) / vidDuration);
-#else
-            video.setPosition((position_master + SYNC_JUMP_AHEAD) / vidDuration);
-            ofLogNotice() << "Jump ahead to: " << (position_master + SYNC_JUMP_AHEAD) / vidDuration;
-#endif
+    if ((fabs(median_deviation) > sync_tolerance) && (position_receiver > SYNC_GRACE_TIME) && (position_sender > SYNC_GRACE_TIME) && (!wait_for_sync)) {
+        ofLogNotice() << "Time: " << ofGetTimestampString("%H:%M %S secs") << "  Sender: " << position_sender << " Receiver: " << position_receiver << " Deviation: " << deviation << " Median deviation: " << median_deviation;
+        if (position_sender < vidDuration) {
+        #ifdef TARGET_RASPBERRY_PI
+            video.seekToTimeInSeconds((position_sender + SYNC_JUMP_AHEAD));
+        #else
+            video.setPosition((position_sender + SYNC_JUMP_AHEAD) / vidDuration);
+            ofLogNotice() << "Jump ahead to: " << (position_sender + SYNC_JUMP_AHEAD) / vidDuration;
+        #endif
 
 
         }
+        #ifndef TARGET_RASPBERRY_PI
         video.update();
+        #endif
         video.setPaused(true);
 
         wait_for_sync = true;
         wait_after_sync = ofGetElapsedTimef();
     }
 
+    #ifndef TARGET_RASPBERRY_PI
     video.update();
+    #endif
 }
 
 void ofxVideoSyncReceiver::loadSettings()

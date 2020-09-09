@@ -1,1 +1,2 @@
 ofxVideoSync
+ofxOMXPlayer

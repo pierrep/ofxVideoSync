@@ -24,15 +24,15 @@ class ofxVideoSyncReceiver {
         ofxOscReceiver oscReceiver;
 
 #ifdef TARGET_RASPBERRY_PI
-        ofxOMXPlayer video
+        ofxOMXPlayer video;
 #else
         ofVideoPlayer video;
 #endif
 
         int totalFrames;
         float vidDuration;
-        float position_master;
-        float position_slave;
+        float position_sender;
+        float position_receiver;
         bool wait_for_sync;
         bool wait_after_sync;
         float wait_after_sync_timer;

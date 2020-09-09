@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     syncSender.load("../../../videos/wifisync.mp4");
-    syncSender.setup();
+    syncSender.setup(true);
     syncSender.play();
 
 }
@@ -15,7 +15,8 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    syncSender.draw(0,0,1280,720);
+//    syncSender.draw(0,0,1280,720);
+    syncSender.draw(0,0,640,360);
 }
 
 //--------------------------------------------------------------

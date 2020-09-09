@@ -1,40 +1,62 @@
 #include "ofxVideoSyncSender.h"
 
-#ifdef TARGET_RASPBERRY_PI
-void ofxVideoSyncSender::load(ofxOMXPlayerSettings settings)
-{
-}
-#else
+
 void ofxVideoSyncSender::load(const string name)
 {
+    #ifdef TARGET_RASPBERRY_PI
+    ofxOMXPlayerSettings settings;
+    string videoPath = ofToDataPath(name, true);
+    settings.videoPath = videoPath;
+    settings.enableTexture = true;
+    settings.enableLooping = true;
+    settings.enableAudio = false;
+
+    video.setup(settings);
+
+    #else
     video.load(name);
+    #endif
 }
-#endif
+
 
 void ofxVideoSyncSender::setup(bool _localhost)
 {
-    if(!video.isLoaded()) {
+    bool bLoaded;    
+    #ifdef TARGET_RASPBERRY_PI
+    bLoaded = video.isOpen();
+    #else
+    bLoaded = video.isLoaded();
+    #endif    
+    if(!bLoaded) {
         ofLogError("ofxVideoSyncSender") << "Video needs to be loaded before setup().";
         return;
     }
 
     bUseLocalhost = _localhost;
     totalFrames = video.getTotalNumFrames();
+    
+    #ifdef TARGET_RASPBERRY_PI
+    vidDuration = video.getDurationInSeconds();
+    #else
     vidDuration = video.getDuration();
+    #endif    
+    ofLogNotice("ofxVideoSyncSender") << "Video duration: " << vidDuration;
 
     if (bUseLocalhost) {
-        ofLogNotice() << "broadcasting on localhost";
+        ofLogNotice("ofxVideoSyncSender") << "broadcasting on localhost";
         oscSender.setup("localhost", 12345);
     } else {
         string ip = getBroadcastIP();
-        ofLogNotice() << "broadcasting on " << ip;
+        ofLogNotice("ofxVideoSyncSender") << "broadcasting on " << ip;
         oscSender.setup(ip, 12345);
     }
 }
 
 void ofxVideoSyncSender::play()
 {
+    #ifndef TARGET_RASPBERRY_PI
     video.play();
+    #endif
 }
 
 void ofxVideoSyncSender::draw(float x, float y, float w, float h)
@@ -44,14 +66,25 @@ void ofxVideoSyncSender::draw(float x, float y, float w, float h)
 
 void ofxVideoSyncSender::draw(float x, float y)
 {
-    video.draw(x, y);
+    #ifdef TARGET_RASPBERRY_PI
+    video.draw(x,y,video.getWidth(),video.getHeight());
+    #else
+    video.draw(x,y);
+    #endif
 }
 
 void ofxVideoSyncSender::update()
 {
+    #ifndef TARGET_RASPBERRY_PI
     video.update();
+    #endif
 
-    float currentPosition = video.getPosition() * vidDuration;
+    float currentPosition;
+    #ifdef TARGET_RASPBERRY_PI
+    currentPosition = video.getMediaTime();
+    #else
+    currentPosition = video.getPosition() * vidDuration;
+    #endif
 
     msg.clear();
     msg.setAddress("/sync/position");
