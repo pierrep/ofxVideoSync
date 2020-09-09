@@ -20,8 +20,20 @@ void ofxVideoSyncReceiver::setup()
 
 void ofxVideoSyncReceiver::load(const string name)
 {
+    #ifdef TARGET_RASPBERRY_PI
+    ofxOMXPlayerSettings settings;
+    settings.videoPath = name;
+    settings.enableTexture = true;
+    settings.enableLooping = true;
+    settings.enableAudio = false;
+
+    video.setup(settings);
+
+    #else
     video.load(name);
+    #endif
 }
+
 
 void ofxVideoSyncReceiver::play()
 {
@@ -111,8 +123,14 @@ void ofxVideoSyncReceiver::update()
     if ((fabs(median_deviation) > sync_tolerance) && (position_slave > SYNC_GRACE_TIME) && (position_master > SYNC_GRACE_TIME) && (!wait_for_sync)) {
         ofLogNotice() << "Time: " << ofGetTimestampString("%H:%M %S secs") << "  Master position: " << position_master << " Slave position: " << position_slave << " Deviation: " << deviation << " Median deviation: " << median_deviation;
         if (position_master < vidDuration) {
+#ifdef TARGET_RASPBERRY_PI
+            video.seekToTimeInSeconds((position_master + SYNC_JUMP_AHEAD) / vidDuration);
+#else
             video.setPosition((position_master + SYNC_JUMP_AHEAD) / vidDuration);
             ofLogNotice() << "Jump ahead to: " << (position_master + SYNC_JUMP_AHEAD) / vidDuration;
+#endif
+
+
         }
         video.update();
         video.setPaused(true);
