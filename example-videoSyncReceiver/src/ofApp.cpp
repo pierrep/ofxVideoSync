@@ -3,7 +3,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){    
-    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetVerticalSync(false);
+    ofSetFrameRate(30);
     syncReceiver.load("../../../videos/wifisync.mp4");
     syncReceiver.setup();
     syncReceiver.play();
@@ -20,7 +21,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    syncReceiver.draw(640,0,640,360);
+    syncReceiver.draw(0,0,ofGetWidth(),ofGetHeight());
 }
 
 //--------------------------------------------------------------

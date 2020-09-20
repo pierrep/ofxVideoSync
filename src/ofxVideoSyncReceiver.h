@@ -42,4 +42,7 @@ class ofxVideoSyncReceiver {
         float median_deviation;
         float sync_tolerance;
         ofXml xml;
+        
+        float seekTime;
+        int frameCount;
 };
