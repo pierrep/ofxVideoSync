@@ -2,9 +2,12 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    ofSetVerticalSync(false);
+    ofSetFrameRate(30);
     syncSender.load("../../../videos/wifisync.mp4");
-    syncSender.setup(true);
+    syncSender.setup(false);
     syncSender.play();
+
 
 }
 

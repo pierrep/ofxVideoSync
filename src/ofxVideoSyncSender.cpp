@@ -1,5 +1,19 @@
 #include "ofxVideoSyncSender.h"
 
+ofxVideoSyncSender::~ofxVideoSyncSender() {
+
+}
+
+#ifdef TARGET_RASPBERRY_PI
+void ofxVideoSyncSender::onVideoLoop(ofxOMXPlayer* player)
+{
+    msg.clear();
+    msg.setAddress("/sync/loop");
+    msg.addIntArg(1);
+    oscSender.sendMessage(msg, false);
+    ofLogNotice() << "*** onVideoLoop called";
+}
+#endif
 
 void ofxVideoSyncSender::load(const string name)
 {
@@ -10,6 +24,7 @@ void ofxVideoSyncSender::load(const string name)
     settings.enableTexture = true;
     settings.enableLooping = true;
     settings.enableAudio = false;
+    settings.listener = this;
 
     video.setup(settings);
 
