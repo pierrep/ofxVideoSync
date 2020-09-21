@@ -87,7 +87,9 @@ void ofxVideoSyncReceiver::updateSync()
             #ifdef TARGET_RASPBERRY_PI
             video.restartMovie();
             #else
-            video.stop();
+            ofLogNotice() << "Received /sync/loop at " << ofGetTimestampString("%H:%M:%S secs");
+            video.setPaused(true);
+            video.setPosition(0);
             video.play();
             #endif
             
@@ -176,24 +178,24 @@ void ofxVideoSyncReceiver::update()
     if ((fabs(median_deviation) > sync_tolerance) && (!wait_for_sync)) {
         ofLogNotice() << "*** Out of Sync! Time: " << ofGetTimestampString("%H:%M:%S secs") << "  Sender: " << position_sender << " Receiver: " << position_receiver << " Deviation: " << deviation << " Median deviation: " << median_deviation;
         if (position_sender < (vidDuration - SYNC_JUMP_AHEAD)) {
-        #ifdef TARGET_RASPBERRY_PI
+    #ifdef TARGET_RASPBERRY_PI
             int seekTimeNew = position_sender + SYNC_JUMP_AHEAD;
             seekTime = seekTimeNew;
             ofLogNotice("ofxVideoSyncReceiver") << "Seek time: " << seekTime;
             video.seekToTimeInSeconds(seekTime);
-        #else
+    #else
             video.setPosition((position_sender + SYNC_JUMP_AHEAD) / vidDuration);
             ofLogNotice() << "Jump ahead to: " << (position_sender + SYNC_JUMP_AHEAD) / vidDuration;
-        #endif
+    #endif
         }
         
-        #ifdef TARGET_RASPBERRY_PI
+    #ifdef TARGET_RASPBERRY_PI
         video.setPaused(false);
         
-        #else
+    #else
         video.update();
         video.setPaused(true);
-        #endif
+    #endif
 
         wait_for_sync = true;
         wait_after_sync = ofGetElapsedTimef();

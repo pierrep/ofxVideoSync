@@ -3,6 +3,7 @@ example-videoSyncReceiver/bin/example-videoSyncReceiver_debug
 example-videoSyncSender/bin/example-videoSyncSender
 example-videoSyncSender/bin/example-videoSyncSender_debug
 example-videoSyncReceiver/build/
+example-videoSyncSender/build/
 example-videoSyncReceiver/videoSyncReceiver.qbs.user
 example-videoSyncSender/videoSyncSender.qbs.user
 example-videoSyncReceiver/obj/

@@ -7,7 +7,11 @@
     #include "ofxOMXPlayer.h"
 #endif
 
+#ifdef TARGET_RASPBERRY_PI
 class ofxVideoSyncSender : public ofxOMXPlayerListener {
+#else
+class ofxVideoSyncSender {
+#endif
     public:
 
         ~ofxVideoSyncSender();

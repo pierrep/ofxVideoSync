@@ -90,7 +90,15 @@ void ofxVideoSyncSender::draw(float x, float y)
 
 void ofxVideoSyncSender::update()
 {
+
     #ifndef TARGET_RASPBERRY_PI
+    if(video.getIsMovieDone()) {
+        ofLogVerbose()<< "Movie is done ...looping";
+        msg.clear();
+        msg.setAddress("/sync/loop");
+        msg.addIntArg(1);
+        oscSender.sendMessage(msg, false);
+    }
     video.update();
     #endif
 

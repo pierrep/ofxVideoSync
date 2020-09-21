@@ -9,7 +9,9 @@ void ofApp::setup(){
     syncReceiver.setup();
     syncReceiver.play();
 
-
+#ifndef TARGET_RASPBERRY_PI
+    ofSetWindowTitle("Receiver");
+#endif
 }
 
 //--------------------------------------------------------------
