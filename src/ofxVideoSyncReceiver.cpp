@@ -74,6 +74,16 @@ void ofxVideoSyncReceiver::draw(float x, float y)
     #endif
 }
 
+#ifdef TARGET_RASPBERRY_PI
+ofxOMXPlayer *  ofxVideoSyncReceiver::getVideoPlayerPtr() {
+    return &video;
+}
+#else
+ofVideoPlayer * ofxVideoSyncReceiver::getVideoPlayerPtr() {
+    return &video;
+}
+#endif 
+
 void ofxVideoSyncReceiver::updateSync()
 {
     if (sync_timer > 0.0f)

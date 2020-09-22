@@ -17,6 +17,13 @@ class ofxVideoSyncReceiver {
         void draw(float x, float y);
         void updateSync();
         void update();
+        
+#ifdef TARGET_RASPBERRY_PI
+        ofxOMXPlayer *  getVideoPlayerPtr();
+#else
+        ofVideoPlayer * getVideoPlayerPtr();
+#endif        
+        
 
     protected:
         void loadSettings();

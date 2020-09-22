@@ -21,7 +21,10 @@ class ofxVideoSyncSender {
         void draw(float x, float y, float w, float h);
         void draw(float x, float y);
         void update();
-        
+        ofTexture&  getTextureReference();
+        void togglePause();
+        int getCurrentFrame();
+        int getTotalNumFrames();
 
     protected:
         string getBroadcastIP();
