@@ -1,9 +1,5 @@
 #include "ofxVideoSyncSender.h"
 
-ofxVideoSyncSender::~ofxVideoSyncSender() {
-
-}
-
 #ifdef TARGET_RASPBERRY_PI
 void ofxVideoSyncSender::onVideoLoop(ofxOMXPlayer* player)
 {
@@ -15,47 +11,14 @@ void ofxVideoSyncSender::onVideoLoop(ofxOMXPlayer* player)
 }
 #endif
 
-void ofxVideoSyncSender::load(const string name)
+//---------------------------------------------------------------------------
+void ofxVideoSyncSender::setup()
 {
-    #ifdef TARGET_RASPBERRY_PI
-    ofxOMXPlayerSettings settings;
-    string videoPath = ofToDataPath(name, true);
-    settings.videoPath = videoPath;
-    settings.enableTexture = true;
-    settings.enableLooping = true;
-    settings.enableAudio = false;
-    settings.listener = this;
+    ofxVideoSyncBase::setup();
+    ofLogVerbose("ofxVideoSyncReceiver") << "setup()";
 
-    video.setup(settings);
-
-    #else
-    video.load(name);
-    #endif
-}
-
-
-void ofxVideoSyncSender::setup(bool _localhost)
-{
-    bool bLoaded;    
-    #ifdef TARGET_RASPBERRY_PI
-    bLoaded = video.isOpen();
-    #else
-    bLoaded = video.isLoaded();
-    #endif    
-    if(!bLoaded) {
-        ofLogError("ofxVideoSyncSender") << "Video needs to be loaded before setup().";
-        return;
-    }
-
-    bUseLocalhost = _localhost;
-    totalFrames = video.getTotalNumFrames();
-    
-    #ifdef TARGET_RASPBERRY_PI
-    vidDuration = video.getDurationInSeconds();
-    #else
-    vidDuration = video.getDuration();
-    #endif    
-    ofLogNotice("ofxVideoSyncSender") << "Video duration: " << vidDuration;
+    //ignore localhost for the moment
+    bUseLocalhost = false;
 
     if (bUseLocalhost) {
         ofLogNotice("ofxVideoSyncSender") << "broadcasting on localhost";
@@ -67,27 +30,7 @@ void ofxVideoSyncSender::setup(bool _localhost)
     }
 }
 
-void ofxVideoSyncSender::play()
-{
-    #ifndef TARGET_RASPBERRY_PI
-    video.play();
-    #endif
-}
-
-void ofxVideoSyncSender::draw(float x, float y, float w, float h)
-{
-    video.draw(x, y, w, h);
-}
-
-void ofxVideoSyncSender::draw(float x, float y)
-{
-    #ifdef TARGET_RASPBERRY_PI
-    video.draw(x,y,video.getWidth(),video.getHeight());
-    #else
-    video.draw(x,y);
-    #endif
-}
-
+//---------------------------------------------------------------------------
 void ofxVideoSyncSender::update()
 {
 
@@ -115,6 +58,7 @@ void ofxVideoSyncSender::update()
     oscSender.sendMessage(msg, false);
 }
 
+//---------------------------------------------------------------------------
 string ofxVideoSyncSender::getBroadcastIP()
 {
     string s = ofSystem("ifconfig");

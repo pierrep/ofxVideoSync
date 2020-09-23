@@ -5,75 +5,21 @@
 
 ofxVideoSyncReceiver::~ofxVideoSyncReceiver()
 {
-    if (!xml.save("settings.xml")) {
-        ofLogError() << "Couldn't save settings.xml";
-    }
+    ofLogNotice() << "ofxVideoSyncReceiver destructed";
+
 }
 
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::setup()
 {
-    bool bLoaded;    
-    #ifdef TARGET_RASPBERRY_PI
-    bLoaded = video.isOpen();
-    #else
-    bLoaded = video.isLoaded();
-    #endif
-    if(!bLoaded) {
-        ofLogError("ofxVideoSyncReceiver") << "Video needs to be loaded before setup().";
-        return;
-    }
-    
-    totalFrames = video.getTotalNumFrames();
-    
-    #ifdef TARGET_RASPBERRY_PI
-    vidDuration = video.getDurationInSeconds();
-    #else
-    vidDuration = video.getDuration();
-    #endif 
-    
+    ofxVideoSyncBase::setup();    
+    ofLogVerbose("ofxVideoSyncReceiver") << "setup()";
+
     loadSettings();
     oscReceiver.setup(12345);
 }
 
-void ofxVideoSyncReceiver::load(const string name)
-{
-    #ifdef TARGET_RASPBERRY_PI
-    ofxOMXPlayerSettings settings;
-    string videoPath = ofToDataPath(name, true);
-    settings.videoPath = videoPath;    
-    settings.enableTexture = true;
-    settings.enableLooping = true;
-    settings.enableAudio = false;
-
-    video.setup(settings);
-
-    #else
-    video.load(name);
-    #endif
-}
-
-
-void ofxVideoSyncReceiver::play()
-{
-    #ifndef TARGET_RASPBERRY_PI
-    video.play();
-    #endif
-}
-
-void ofxVideoSyncReceiver::draw(float x, float y, float w, float h)
-{
-    video.draw(x,y,w,h);
-}
-
-void ofxVideoSyncReceiver::draw(float x, float y)
-{
-    #ifdef TARGET_RASPBERRY_PI
-    video.draw(x,y,video.getWidth(),video.getHeight());
-    #else
-    video.draw(x,y);
-    #endif
-}
-
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::updateSync()
 {
     if (sync_timer > 0.0f)
@@ -140,6 +86,7 @@ void ofxVideoSyncReceiver::updateSync()
     }
 }
 
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::update()
 {
     updateSync();
@@ -206,9 +153,10 @@ void ofxVideoSyncReceiver::update()
     #endif
 }
 
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::loadSettings()
 {
-    if (!xml.load("settings.xml")) {
+    if (!xml.load("sync_settings.xml")) {
         ofLogWarning() << "Couldn't load settings file. We will create it instead.";
     }
     auto settings = xml.getChild("settings");
@@ -216,8 +164,8 @@ void ofxVideoSyncReceiver::loadSettings()
         settings = xml.appendChild("settings");
     }
 
-    ofXml entry = settings.findFirst("sync_tolerance");
-    if (!entry) {
+    ofXml entry2 = settings.findFirst("sync_tolerance");
+    if (!entry2) {
         // remove any possible malformed tag
         settings.removeChild("sync_tolerance");
         settings.appendChild("sync_tolerance").set(0.05f);
@@ -227,5 +175,9 @@ void ofxVideoSyncReceiver::loadSettings()
     if (tolerance) {
         sync_tolerance = tolerance.getFloatValue();
         ofLogNotice() << "Set sync tolerance to: " << sync_tolerance;
+    }
+
+    if (!xml.save("sync_settings.xml")) {
+        ofLogError() << "Couldn't save settings.xml";
     }
 }

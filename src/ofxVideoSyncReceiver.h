@@ -2,35 +2,24 @@
 
 #include "ofMain.h"
 #include "ofxOsc.h"
+#include "ofxVideoSyncBase.h"
 
 #ifdef TARGET_RASPBERRY_PI
     #include "ofxOMXPlayer.h"
 #endif
 
-class ofxVideoSyncReceiver {
+class ofxVideoSyncReceiver : public ofxVideoSyncBase  {
     public:
         ~ofxVideoSyncReceiver();
         void setup();
-        void load(const string video);
-        void play();
-        void draw(float x, float y, float w, float h);
-        void draw(float x, float y);
-        void updateSync();
         void update();
 
     protected:
+        void updateSync();
         void loadSettings();
 
         ofxOscReceiver oscReceiver;
 
-#ifdef TARGET_RASPBERRY_PI
-        ofxOMXPlayer video;
-#else
-        ofVideoPlayer video;
-#endif
-
-        int totalFrames;
-        float vidDuration;
         float position_sender;
         float position_receiver;
         bool wait_for_sync;
@@ -41,7 +30,6 @@ class ofxVideoSyncReceiver {
         float sync_timer;
         float median_deviation;
         float sync_tolerance;
-        ofXml xml;
         
         float seekTime;
         int frameCount;

@@ -4,8 +4,9 @@
 void ofApp::setup(){
     ofSetVerticalSync(false);
     ofSetFrameRate(30);
+
+    syncSender.setType(SYNC_SENDER);
     syncSender.load("../../../videos/wifisync.mp4");
-    syncSender.setup(true);
     syncSender.play();
 
 #ifndef TARGET_RASPBERRY_PI

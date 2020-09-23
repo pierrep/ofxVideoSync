@@ -2,26 +2,21 @@
 
 #include "ofMain.h"
 #include "ofxOsc.h"
+#include "ofxVideoSyncBase.h"
 
 #ifdef TARGET_RASPBERRY_PI
     #include "ofxOMXPlayer.h"
 #endif
 
 #ifdef TARGET_RASPBERRY_PI
-class ofxVideoSyncSender : public ofxOMXPlayerListener {
+class ofxVideoSyncSender : public ofxVideoSyncBase, public ofxOMXPlayerListener {
 #else
-class ofxVideoSyncSender {
+class ofxVideoSyncSender : public ofxVideoSyncBase {
 #endif
     public:
 
-        ~ofxVideoSyncSender();
-        void load(const string video);
-        void setup(bool _localhost = false);
-        void play();
-        void draw(float x, float y, float w, float h);
-        void draw(float x, float y);
+        void setup();
         void update();
-        
 
     protected:
         string getBroadcastIP();
@@ -29,15 +24,10 @@ class ofxVideoSyncSender {
         ofxOscSender oscSender;
         ofxOscMessage msg;
         
-        int totalFrames;
-        float vidDuration;
         bool bUseLocalhost;
 
 #ifdef TARGET_RASPBERRY_PI
-        ofxOMXPlayer video;
         void onVideoLoop(ofxOMXPlayer* player);
         void onVideoEnd(ofxOMXPlayer* player) {};
-#else
-        ofVideoPlayer video;
 #endif
 };
