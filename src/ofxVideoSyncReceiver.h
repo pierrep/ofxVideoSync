@@ -13,6 +13,13 @@ class ofxVideoSyncReceiver : public ofxVideoSyncBase  {
         ~ofxVideoSyncReceiver();
         void setup();
         void update();
+        
+#ifdef TARGET_RASPBERRY_PI
+        ofxOMXPlayer *  getVideoPlayerPtr();
+#else
+        ofVideoPlayer * getVideoPlayerPtr();
+#endif        
+        
 
     protected:
         void updateSync();

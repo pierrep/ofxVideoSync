@@ -19,7 +19,6 @@ void ofxVideoSyncReceiver::setup()
     oscReceiver.setup(12345);
 }
 
-//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::updateSync()
 {
     if (sync_timer > 0.0f)

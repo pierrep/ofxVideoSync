@@ -6,7 +6,7 @@ void ofApp::setup(){
     ofSetVerticalSync(false);
     ofSetFrameRate(30);
 
-    syncReceiver.setType(SYNC_RECEIVER);
+    //syncReceiver.setType(SYNC_RECEIVER);
     syncReceiver.load("../../../videos/wifisync.mp4");
     syncReceiver.play();
 
