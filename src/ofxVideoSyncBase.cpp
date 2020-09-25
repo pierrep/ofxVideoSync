@@ -6,26 +6,19 @@
 
 
 #include "ofxVideoSyncBase.h"
-
 //---------------------------------------------------------------------------
-void ofxVideoSyncBase::load(const string name)
+ofxVideoSyncBase::ofxVideoSyncBase() 
 {
-    #ifdef TARGET_RASPBERRY_PI
-    ofxOMXPlayerSettings settings;
-    string videoPath = ofToDataPath(name, true);
-    settings.videoPath = videoPath;
-    settings.enableTexture = true;
-    settings.enableLooping = true;
-    settings.enableAudio = false;
-    settings.listener = this;
 
-    video.setup(settings);
-
-    #else
-    video.load(name);
-    #endif
 }
 
+//---------------------------------------------------------------------------
+ofxVideoSyncBase::~ofxVideoSyncBase() 
+{
+    ofLogNotice() << "Base class destructor called"; 
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSyncBase::setup() {
     bool bLoaded;
     #ifdef TARGET_RASPBERRY_PI
@@ -76,7 +69,11 @@ void ofxVideoSyncBase::draw(float x, float y)
 //---------------------------------------------------------------------------
 void ofxVideoSyncBase::stop()
 {
+    #ifdef TARGET_RASPBERRY_PI
+    video.setPaused(true);
+    #else
     video.stop();
+    #endif
 }
 
 //---------------------------------------------------------------------------
@@ -106,14 +103,22 @@ void ofxVideoSyncBase::togglePause() {
 
 //--------------------------------------------------------
 void ofxVideoSyncBase::setLoopState(ofLoopType state) {
+#ifdef TARGET_RASPBERRY_PI
+    if(state == OF_LOOP_NORMAL) {
+        video.enableLooping();
+    } else {
+        video.disableLooping();
+    }
+#else
     video.setLoopState(state);
+#endif
 }
 
 //---------------------------------------------------------------------------
-ofLoopType ofxVideoSyncBase::getLoopState() const {
+ofLoopType ofxVideoSyncBase::getLoopState() {
 #ifdef TARGET_RASPBERRY_PI
-    if(video.isLoopingEnabled)
-        return OF_LOOP_NORMAL
+    if(video.isLoopingEnabled())
+        return OF_LOOP_NORMAL;
     else
         return OF_LOOP_NONE;
 #else

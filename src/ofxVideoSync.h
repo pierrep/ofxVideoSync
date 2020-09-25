@@ -17,7 +17,7 @@ enum SyncType : short{
 
 class ofxVideoSync {
 public:
-    ofxVideoSync() {}
+    ofxVideoSync();
     void load(const std::string video);
     void play();
     void draw(float x, float y, float w, float h);
@@ -36,12 +36,16 @@ public:
     void loadSettings();
 
 #ifdef TARGET_RASPBERRY_PI
-        ofxOMXPlayer* getVideoPlayerPtr();
+    ofxOMXPlayer* getVideoPlayerPtr();
+    void setPlayerSettings(ofxOMXPlayerSettings settings) {playerSettings = settings;}
 #else
-        ofVideoPlayer* getVideoPlayerPtr();
+    ofVideoPlayer* getVideoPlayerPtr();
 #endif
 
 private:
+#ifdef TARGET_RASPBERRY_PI
+    ofxOMXPlayerSettings playerSettings;
+#endif    
 	std::shared_ptr<ofxVideoSyncBase>		player;
     void setPlayer(std::shared_ptr<ofxVideoSyncBase> newPlayer);
     SyncType sync_type;

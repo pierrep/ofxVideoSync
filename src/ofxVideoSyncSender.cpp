@@ -12,6 +12,22 @@ void ofxVideoSyncSender::onVideoLoop(ofxOMXPlayer* player)
 #endif
 
 //---------------------------------------------------------------------------
+void ofxVideoSyncSender::load(const string name)
+{
+    #ifdef TARGET_RASPBERRY_PI
+
+    string videoPath = ofToDataPath(name, true);
+    playerSettings.videoPath = videoPath;
+    playerSettings.listener = this;
+
+    video.setup(playerSettings);
+
+    #else
+    video.load(name);
+    #endif
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSyncSender::setup()
 {
     ofxVideoSyncBase::setup();

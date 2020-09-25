@@ -10,6 +10,21 @@ ofxVideoSyncReceiver::~ofxVideoSyncReceiver()
 }
 
 //---------------------------------------------------------------------------
+void ofxVideoSyncReceiver::load(const string name)
+{
+    #ifdef TARGET_RASPBERRY_PI
+
+    string videoPath = ofToDataPath(name, true);
+    playerSettings.videoPath = videoPath;
+
+    video.setup(playerSettings);
+
+    #else
+    video.load(name);
+    #endif
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::setup()
 {
     ofxVideoSyncBase::setup();    

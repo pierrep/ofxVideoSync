@@ -14,8 +14,9 @@
 
 class ofxVideoSyncBase {
 public:
-    ~ofxVideoSyncBase() { ofLogNotice() << "Base class destructor called"; }
-    void load(const std::string video);
+    ofxVideoSyncBase();
+    virtual ~ofxVideoSyncBase();
+    virtual void load(const std::string video) = 0;
     virtual void setup();
     virtual void update() = 0;
 
@@ -28,10 +29,11 @@ public:
     void setPaused(bool bPause);
     void togglePause();
     void setLoopState(ofLoopType state);
-    virtual ofLoopType getLoopState() const;
+    virtual ofLoopType getLoopState();
     ofTexture& getTexture();
 
 #ifdef TARGET_RASPBERRY_PI
+    void setPlayerSettings(ofxOMXPlayerSettings settings) {playerSettings = settings;}
     ofxOMXPlayer* getVideoPlayerPtr()
     {
         return &video;
@@ -46,6 +48,7 @@ public:
 protected:
 #ifdef TARGET_RASPBERRY_PI
     ofxOMXPlayer video;
+    ofxOMXPlayerSettings playerSettings;
 #else
     ofVideoPlayer video;
 #endif

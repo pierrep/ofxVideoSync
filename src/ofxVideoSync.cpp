@@ -2,6 +2,15 @@
 #include "ofxVideoSyncReceiver.h"
 #include "ofxVideoSyncSender.h"
 
+//---------------------------------------------------------------------------
+ofxVideoSync::ofxVideoSync()
+{
+    playerSettings.enableTexture = true;
+    playerSettings.enableLooping = true;
+    playerSettings.enableAudio = false;    
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSync::loadSettings()
 {
     if (!xml.load("sync_settings.xml")) {
@@ -35,6 +44,7 @@ void ofxVideoSync::loadSettings()
     }
 }
 
+//---------------------------------------------------------------------------
 void ofxVideoSync::load(const std::string video)
 {
     if(sync_type == SyncType::SYNC_NONE) {
@@ -50,6 +60,9 @@ void ofxVideoSync::load(const std::string video)
         }
     }
 
+#ifdef TARGET_RASPBERRY_PI
+    player->setPlayerSettings(playerSettings);
+#endif
     player->load(video);
     player->setup();
 
@@ -143,7 +156,7 @@ ofTexture & ofxVideoSync::getTexture(){
     return player->getTexture();
 }
 
-
+//---------------------------------------------------------------------------
 #ifdef TARGET_RASPBERRY_PI
 ofxOMXPlayer* ofxVideoSync::getVideoPlayerPtr() {
 #else

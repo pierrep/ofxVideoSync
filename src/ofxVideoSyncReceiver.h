@@ -11,6 +11,7 @@
 class ofxVideoSyncReceiver : public ofxVideoSyncBase  {
     public:
         ~ofxVideoSyncReceiver();
+        void load(const string name);
         void setup();
         void update();
         

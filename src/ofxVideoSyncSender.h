@@ -14,7 +14,7 @@ class ofxVideoSyncSender : public ofxVideoSyncBase, public ofxOMXPlayerListener 
 class ofxVideoSyncSender : public ofxVideoSyncBase {
 #endif
     public:
-
+        void load(const string name);
         void setup();
         void update();
 
