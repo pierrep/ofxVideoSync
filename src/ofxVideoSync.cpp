@@ -5,9 +5,11 @@
 //---------------------------------------------------------------------------
 ofxVideoSync::ofxVideoSync()
 {
+    #ifdef TARGET_RASPBERRY_PI
     playerSettings.enableTexture = true;
     playerSettings.enableLooping = true;
     playerSettings.enableAudio = false;    
+#endif
 }
 
 //---------------------------------------------------------------------------
