@@ -5,11 +5,27 @@
 //---------------------------------------------------------------------------
 ofxVideoSync::ofxVideoSync()
 {
+    sync_type = SyncType::SYNC_NONE;
+
     #ifdef TARGET_RASPBERRY_PI
     playerSettings.enableTexture = true;
     playerSettings.enableLooping = true;
     playerSettings.enableAudio = false;    
 #endif
+}
+
+//---------------------------------------------------------------------------
+void ofxVideoSync::disableSync()
+{
+    if( !player ) return;
+    player->disableSync();
+}
+
+//---------------------------------------------------------------------------
+void ofxVideoSync::enableSync()
+{
+    if( !player ) return;
+    player->enableSync();
 }
 
 //---------------------------------------------------------------------------
@@ -32,11 +48,18 @@ void ofxVideoSync::loadSettings()
     auto new_sync_type = xml.findFirst("//sync_type");
     if (new_sync_type) {
         string value = new_sync_type.getValue();
-        if(value == "Sender") {
+
+        for(int i = 0;i < value.length();i++) {
+            value[i] = std::tolower(value[i]);
+        }
+
+        if(value == "sender") {
             sync_type = SyncType::SYNC_SENDER;
         }
-        else {
+        else if(value == "receiver") {
             sync_type = SyncType::SYNC_RECEIVER;
+        } else {
+            ofLogError() << "Couldn't determine sync type from sync_settings.xml file. ";
         }
         ofLogNotice() << "Set sync type to: " << value;
     }
@@ -44,6 +67,7 @@ void ofxVideoSync::loadSettings()
     if (!xml.save("sync_settings.xml")) {
         ofLogError() << "Couldn't save settings.xml";
     }
+    return;
 }
 
 //---------------------------------------------------------------------------
@@ -72,31 +96,37 @@ void ofxVideoSync::load(const std::string video)
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::play() {
+    if( !player ) return;
     player->play();
 }
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::stop() {
+    if( !player ) return;
     player->stop();
 }
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::close() {
+    if( !player ) return;
     player->close();
 }
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::draw(float x, float y, float w, float h) {
+    if( !player ) return;
     player->draw(x,y,w,h);
 }
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::draw(float x, float y) {
+    if( !player ) return;
     player->draw(x,y);
 }
 
 //---------------------------------------------------------------------------
 void ofxVideoSync::update() {
+    if( !player ) return;
     player->update();
 }
 

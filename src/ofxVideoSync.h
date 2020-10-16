@@ -34,6 +34,8 @@ public:
     void togglePause();
     bool isPaused() const;
     void loadSettings();
+    void enableSync();
+    void disableSync();
 
 #ifdef TARGET_RASPBERRY_PI
     ofxOMXPlayer* getVideoPlayerPtr();

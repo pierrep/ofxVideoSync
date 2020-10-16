@@ -17,6 +17,8 @@ class ofxVideoSyncSender : public ofxVideoSyncBase {
         void load(const string name);
         void setup();
         void update();
+        void enableSync();
+        void disableSync();
 
     protected:
         string getBroadcastIP();

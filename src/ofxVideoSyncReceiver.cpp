@@ -10,6 +10,24 @@ ofxVideoSyncReceiver::~ofxVideoSyncReceiver()
 }
 
 //---------------------------------------------------------------------------
+void ofxVideoSyncReceiver::enableSync()
+{
+    sync_enabled = true;
+    wait_for_sync = false;
+    wait_after_sync = false;
+    deviations.clear();
+    wait_after_sync_timer = 0.0f;
+    sync_timer = 0.0f;
+    frameCount = 0;
+}
+
+//---------------------------------------------------------------------------
+void ofxVideoSyncReceiver::disableSync()
+{
+    sync_enabled = true;
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSyncReceiver::load(const string name)
 {
     #ifdef TARGET_RASPBERRY_PI
@@ -36,6 +54,8 @@ void ofxVideoSyncReceiver::setup()
 
 void ofxVideoSyncReceiver::updateSync()
 {
+    if(!sync_enabled) return;
+
     if (sync_timer > 0.0f)
         return;
 
@@ -105,61 +125,64 @@ void ofxVideoSyncReceiver::update()
 {
     updateSync();
 
-    if (wait_for_sync && (sync_timer > 0.0f)) {
-        float counter = fabs(deviation) - (ofGetElapsedTimef() - sync_timer);
+    if(sync_enabled) {
+        if (wait_for_sync && (sync_timer > 0.0f)) {
+            float counter = fabs(deviation) - (ofGetElapsedTimef() - sync_timer);
+
+            #ifdef TARGET_RASPBERRY_PI
+            if (counter < 0.003f) {
+                position_receiver = video.getMediaTime();
+            #else
+            if (counter < 0.0f) {
+                position_receiver = video.getPosition() * vidDuration;
+            #endif
+                ofLogNotice() << "we are synchronised, play..." << "Receiver: " << position_receiver << " Sender: " << position_sender << " Counter: " << counter;
+                video.setPaused(false);
+
+                wait_for_sync = false;
+                wait_after_sync = true;
+                wait_after_sync_timer = ofGetElapsedTimef();
+                deviations.clear();
+                sync_timer = 0.0f;
+            }
+            return;
+        }
+
+        if (wait_after_sync) {
+            if ((ofGetElapsedTimef() - wait_after_sync_timer) > SYNC_GRACE_TIME) {
+                wait_after_sync = false;
+                ofLogVerbose() << "Wait after sync expired...";
+            }
+            return;
+        }
+
+        //if ((fabs(median_deviation) > sync_tolerance) && (position_receiver > SYNC_GRACE_TIME) && (position_sender > SYNC_GRACE_TIME) && (!wait_for_sync)) {
+        if ((fabs(median_deviation) > sync_tolerance) && (!wait_for_sync)) {
+            ofLogNotice() << "*** Out of Sync! Time: " << ofGetTimestampString("%H:%M:%S secs") << "  Sender: " << position_sender << " Receiver: " << position_receiver << " Deviation: " << deviation << " Median deviation: " << median_deviation;
+            if (position_sender < (vidDuration - SYNC_JUMP_AHEAD)) {
+        #ifdef TARGET_RASPBERRY_PI
+                int seekTimeNew = position_sender + SYNC_JUMP_AHEAD;
+                seekTime = seekTimeNew;
+                ofLogNotice("ofxVideoSyncReceiver") << "Seek time: " << seekTime;
+                video.seekToTimeInSeconds(seekTime);
+        #else
+                video.setPosition((position_sender + SYNC_JUMP_AHEAD) / vidDuration);
+                ofLogNotice() << "Jump ahead to: " << (position_sender + SYNC_JUMP_AHEAD) / vidDuration;
+        #endif
+            }
 
         #ifdef TARGET_RASPBERRY_PI
-        if (counter < 0.003f) {
-            position_receiver = video.getMediaTime();
-        #else
-        if (counter < 0.0f) {            
-            position_receiver = video.getPosition() * vidDuration;
-        #endif
-            ofLogNotice() << "we are synchronised, play..." << "Receiver: " << position_receiver << " Sender: " << position_sender << " Counter: " << counter;
             video.setPaused(false);
 
-            wait_for_sync = false;
-            wait_after_sync = true;
-            wait_after_sync_timer = ofGetElapsedTimef();
-            deviations.clear();
-            sync_timer = 0.0f;
-        }
-        return;
-    }
+        #else
+            video.update();
+            video.setPaused(true);
+        #endif
 
-    if (wait_after_sync) {
-        if ((ofGetElapsedTimef() - wait_after_sync_timer) > SYNC_GRACE_TIME) {
-            wait_after_sync = false;
-            ofLogVerbose() << "Wait after sync expired...";
+            wait_for_sync = true;
+            wait_after_sync = ofGetElapsedTimef();
         }
-        return;
-    }
 
-    //if ((fabs(median_deviation) > sync_tolerance) && (position_receiver > SYNC_GRACE_TIME) && (position_sender > SYNC_GRACE_TIME) && (!wait_for_sync)) {
-    if ((fabs(median_deviation) > sync_tolerance) && (!wait_for_sync)) {
-        ofLogNotice() << "*** Out of Sync! Time: " << ofGetTimestampString("%H:%M:%S secs") << "  Sender: " << position_sender << " Receiver: " << position_receiver << " Deviation: " << deviation << " Median deviation: " << median_deviation;
-        if (position_sender < (vidDuration - SYNC_JUMP_AHEAD)) {
-    #ifdef TARGET_RASPBERRY_PI
-            int seekTimeNew = position_sender + SYNC_JUMP_AHEAD;
-            seekTime = seekTimeNew;
-            ofLogNotice("ofxVideoSyncReceiver") << "Seek time: " << seekTime;
-            video.seekToTimeInSeconds(seekTime);
-    #else
-            video.setPosition((position_sender + SYNC_JUMP_AHEAD) / vidDuration);
-            ofLogNotice() << "Jump ahead to: " << (position_sender + SYNC_JUMP_AHEAD) / vidDuration;
-    #endif
-        }
-        
-    #ifdef TARGET_RASPBERRY_PI
-        video.setPaused(false);
-        
-    #else
-        video.update();
-        video.setPaused(true);
-    #endif
-
-        wait_for_sync = true;
-        wait_after_sync = ofGetElapsedTimef();
     }
 
     #ifndef TARGET_RASPBERRY_PI

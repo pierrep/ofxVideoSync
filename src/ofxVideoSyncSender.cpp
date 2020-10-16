@@ -12,6 +12,19 @@ void ofxVideoSyncSender::onVideoLoop(ofxOMXPlayer* player)
 #endif
 
 //---------------------------------------------------------------------------
+void ofxVideoSyncSender::enableSync()
+{
+    sync_enabled = true;
+
+}
+
+//---------------------------------------------------------------------------
+void ofxVideoSyncSender::disableSync()
+{
+    sync_enabled = true;
+}
+
+//---------------------------------------------------------------------------
 void ofxVideoSyncSender::load(const string name)
 {
     #ifdef TARGET_RASPBERRY_PI
@@ -51,7 +64,7 @@ void ofxVideoSyncSender::update()
 {
 
     #ifndef TARGET_RASPBERRY_PI
-    if(video.getIsMovieDone()) {
+    if(video.getIsMovieDone() && sync_enabled) {
         ofLogVerbose()<< "Movie is done ...looping";
         msg.clear();
         msg.setAddress("/sync/loop");
@@ -61,17 +74,19 @@ void ofxVideoSyncSender::update()
     video.update();
     #endif
 
-    float currentPosition;
-    #ifdef TARGET_RASPBERRY_PI
-    currentPosition = video.getMediaTime();
-    #else
-    currentPosition = video.getPosition() * vidDuration;
-    #endif
+    if(sync_enabled) {
+        float currentPosition;
+        #ifdef TARGET_RASPBERRY_PI
+        currentPosition = video.getMediaTime();
+        #else
+        currentPosition = video.getPosition() * vidDuration;
+        #endif
 
-    msg.clear();
-    msg.setAddress("/sync/position");
-    msg.addFloatArg(currentPosition);
-    oscSender.sendMessage(msg, false);
+        msg.clear();
+        msg.setAddress("/sync/position");
+        msg.addFloatArg(currentPosition);
+        oscSender.sendMessage(msg, false);
+    }
 }
 
 //---------------------------------------------------------------------------

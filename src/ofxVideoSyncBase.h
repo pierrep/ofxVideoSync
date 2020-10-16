@@ -19,6 +19,8 @@ public:
     virtual void load(const std::string video) = 0;
     virtual void setup();
     virtual void update() = 0;
+    virtual void enableSync() = 0;
+    virtual void disableSync() = 0;
 
     void play();
     void draw(float x, float y, float w, float h);
@@ -29,7 +31,7 @@ public:
     void setPaused(bool bPause);
     void togglePause();
     void setLoopState(ofLoopType state);
-    virtual ofLoopType getLoopState();
+    ofLoopType getLoopState();
     ofTexture& getTexture();
 
 #ifdef TARGET_RASPBERRY_PI
@@ -55,5 +57,6 @@ protected:
     int totalFrames;
     float vidDuration;
     ofXml xml;
+    bool sync_enabled;
 
 };
