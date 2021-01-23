@@ -6,3 +6,6 @@ Currently tested and works on Raspberry Pi and Linux.
 
 You need to connect devices using a LAN cable, WIFI isn't reliable enough to sync.
 
+This addon took inspiration from the following project: https://github.com/turingmachine/omxplayer-sync
+
+
