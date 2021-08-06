@@ -8,6 +8,7 @@ You need to connect devices using a LAN cable, WIFI isn't reliable enough to syn
 
 This addon took inspiration from the following project: https://github.com/turingmachine/omxplayer-sync
 
-On Rasberry Pi you'll need to use my ofxOMXPlayer branch that fixes seeking - https://github.com/pierrep/ofxOMXPlayer/tree/SeekingFix
+~~On Rasberry Pi you'll need to use my ofxOMXPlayer branch that fixes seeking - https://github.com/pierrep/ofxOMXPlayer/tree/SeekingFix~~ (no longer necessary as my fix got merged into ofxOMXPlayer
+
 
 
